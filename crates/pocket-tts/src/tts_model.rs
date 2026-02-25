@@ -444,7 +444,11 @@ impl TTSModel {
     }
 
     #[cfg(not(target_arch = "wasm32"))]
-    pub fn save_audio_as_voice_prompt<P: AsRef<std::path::Path>>(&self, audio_path: P, safetensors_path: P) -> Result<()> {
+    pub fn save_audio_as_voice_prompt<P: AsRef<std::path::Path>>(
+        &self,
+        audio_path: P,
+        safetensors_path: P,
+    ) -> Result<()> {
         let (audio, sample_rate) = crate::audio::read_wav(audio_path)?;
 
         // Resample to model sample rate if needed
@@ -456,11 +460,11 @@ impl TTSModel {
 
         // Add batch dimension: [C, T] -> [B, C, T]
         let audio = audio.unsqueeze(0)?;
-        
+
         let conditioning = self.get_conditioning(&audio)?;
         let data = HashMap::from([("audio_prompt", conditioning)]);
         candle_core::safetensors::save(&data, safetensors_path)?;
-        
+
         Ok(())
     }
 
@@ -524,7 +528,7 @@ impl TTSModel {
 
     pub fn get_conditioning(&self, audio: &Tensor) -> Result<Tensor> {
         let mut model_state = init_states(1, 1000);
-        
+
         // Ensure audio tensor is on the same device as the model (fixes Metal device mismatch)
         let audio = if audio.device().same_device(&self.device) {
             audio.clone()
