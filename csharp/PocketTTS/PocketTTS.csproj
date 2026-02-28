@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <PackageId>PocketTTS</PackageId>
+    <Version>0.6.2</Version>
+    <Authors>Pocket TTS Contributors</Authors>
+    <Company>Pocket TTS</Company>
+    <Description>Wrapped Pocket TTS</Description>
+    <PackageLicenseExpression>MIT OR Apache-2.0</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/babybirdprd/pocket-tts</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/babybirdprd/pocket-tts</RepositoryUrl>
+    <PackageTags>tts;speech-synthesis;text-to-speech;audio;rust;candle</PackageTags>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Windows x64 native library -->
+    <Content Include="..\..\runtimes\win-x64\native\pocket_tts.dll" PackagePath="runtimes\win-x64\native\" Pack="true">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+
+    <!-- Linux x64 native library -->
+    <Content Include="..\..\runtimes\linux-x64\native\libpocket_tts.so" PackagePath="runtimes\linux-x64\native\" Pack="true">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+</Project>

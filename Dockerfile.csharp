@@ -1,0 +1,49 @@
+# Multi-platform Rust build for C# bindings
+# Builds native libraries for Windows and Linux
+
+FROM rust:1.92-bullseye AS base
+RUN cargo install cargo-chef --locked
+
+FROM base AS planner
+WORKDIR /build
+COPY Cargo.toml Cargo.lock ./
+COPY crates/ ./crates/
+RUN cargo chef prepare --recipe-path recipe.json
+
+FROM base AS builder
+
+# Install cross-compilation tools
+RUN apt-get update && apt-get install -y \
+    cmake \
+    gcc-mingw-w64-x86-64 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Rust targets
+RUN rustup target add x86_64-pc-windows-gnu
+RUN rustup target add x86_64-unknown-linux-gnu
+RUN rustup target add x86_64-apple-darwin
+RUN rustup target add aarch64-apple-darwin
+
+
+FROM builder AS build_linux
+WORKDIR /build
+COPY --from=planner /build/recipe.json recipe.json
+RUN cargo chef cook --release --package pocket-tts-csharp --target x86_64-unknown-linux-gnu --recipe-path recipe.json
+COPY Cargo.toml Cargo.lock ./
+COPY crates/ ./crates/
+RUN cargo build --release --package pocket-tts-csharp --target x86_64-unknown-linux-gnu
+
+FROM builder AS build_windows
+WORKDIR /build
+COPY --from=planner /build/recipe.json recipe.json
+RUN cargo chef cook --release --package pocket-tts-csharp --target x86_64-pc-windows-gnu --recipe-path recipe.json
+COPY Cargo.toml Cargo.lock ./
+COPY crates/ ./crates/
+RUN cargo build --release --package pocket-tts-csharp --target x86_64-pc-windows-gnu
+
+# Create output stage
+FROM scratch AS artifacts
+COPY --from=build_linux /build/target/x86_64-unknown-linux-gnu/release/libpocket_tts_csharp.so /linux-x64/libpocket_tts.so
+COPY --from=build_windows /build/target/x86_64-pc-windows-gnu/release/pocket_tts_csharp.dll /win-x64/pocket_tts.dll
+
+CMD echo "not supposed to run this image"

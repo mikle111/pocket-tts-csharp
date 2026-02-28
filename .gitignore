@@ -91,3 +91,13 @@ CLAUDE.md
 QWEN.md
 .claude/
 temp-candle/
+
+#Rider project settings
+**/.idea/
+**/*.dotSettings.user
+
+#Built libraries for C#
+runtimes/
+
+#Built nuget
+nuget/
