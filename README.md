@@ -58,10 +58,21 @@ scripts/pack-nuget.ps1
 ### Examples
 
 ```csharp
+//Load model
 using var model = ModelHandle.LoadFromFiles(configPath, weightsPath, tokenizerPath);
-var inferenceService = new PocketTtsInferenceService(model, 4);
-const string voiceName = "some_name";
-inferenceService.AddVoice(voiceName, "path/to/voice/sample.wav");
+Console.WriteLine($"Loaded model. Sample reate {model.SampleRate}");
+
+//Create PocketTtsInferenceService
+var inferenceService = new PocketTtsInferenceService(model, 8);
+
+//Add voice and assign some name do it
+const string voiceName = "reference voice";
+inferenceService.AddVoice(voiceName, "ref.wav");
+
+//Run the Service
+var serviceCts = new CancellationTokenSource();
+var serviceRunTask = inferenceService.Run(serviceCts.Token);
+
 var text = "Hello there, PacketTTS!";
 
 //simple inference
@@ -72,9 +83,13 @@ Helpers.WriteWav(audio, model.SampleRate, $"out.wav");
 var audioChunks = new List<float>();
 await foreach (var chunk in inferenceService.GenerateStream(text, voiceName, CancellationToken.None))
 {
-	audioChunks.AddRange(chunk);
+    audioChunks.AddRange(chunk);
 }
 Helpers.WriteWav(audioChunks, model.SampleRate, $"out_streaming.wav");
+
+//Stop the Service
+await serviceCts.CancelAsync();
+await serviceRunTask;
 ```
 
 Check csharp/PocketTTS.Example

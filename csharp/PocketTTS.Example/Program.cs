@@ -28,44 +28,25 @@ namespace PocketTTS.Example
                 inferenceService.AddVoice(voiceName, "ref.wav");
                 
                 //Run the Service
-                var serviceStoppingToken = new CancellationTokenSource();
-                var serviceRunTask = inferenceService.Run(serviceStoppingToken.Token);
+                var serviceCts = new CancellationTokenSource();
+                var serviceRunTask = inferenceService.Run(serviceCts.Token);
                 
-                //Perform inference
-                async Task Simple(int taskId)
-                {
-                    var text = $"This is a task with id {taskId}, good job!";
-                    var audio = await inferenceService.Generate(text, voiceName, CancellationToken.None);
-                    Helpers.WriteWav(audio, model.SampleRate, $"task_{taskId}.wav");
-                    
-                    Console.WriteLine($"Completed task {taskId}");
-                }
+                var text = "Hello there, PacketTTS!";
 
-                async Task Streaming(int taskId)
+                //simple inference
+                var audio = await inferenceService.Generate(text, voiceName, CancellationToken.None);
+                Helpers.WriteWav(audio, model.SampleRate, $"out.wav");
+
+                //streaming inference
+                var audioChunks = new List<float>();
+                await foreach (var chunk in inferenceService.GenerateStream(text, voiceName, CancellationToken.None))
                 {
-                    var text = $"This is a streaming task with id {taskId}, good job!";
-                    var audio = new List<float>();
-                    await foreach (var chunk in inferenceService.GenerateStream(text, voiceName, CancellationToken.None))
-                    {
-                        audio.AddRange(chunk);
-                    }
-                    Helpers.WriteWav(audio, model.SampleRate, $"task_{taskId}.wav");
-                    
-                    Console.WriteLine($"Completed task {taskId}");
+                    audioChunks.AddRange(chunk);
                 }
-                
-                var inferenceTasks = new List<Task>();
-                for (var i = 0; i < 20; i++)
-                {
-                    var taskId = i;
-                    inferenceTasks.Add(i % 2 == 0 
-                        ? Simple(taskId) 
-                        : Streaming(taskId));
-                }
-                await Task.WhenAll(inferenceTasks);
+                Helpers.WriteWav(audioChunks, model.SampleRate, $"out_streaming.wav");
                 
                 //Stop the Service
-                await serviceStoppingToken.CancelAsync();
+                await serviceCts.CancelAsync();
                 await serviceRunTask;
             }
             catch (Exception ex)
