@@ -17,6 +17,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Include="..\..\README.md">
+      <Link>README.md</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    
     <!-- Windows x64 native library -->
     <Content Include="..\..\runtimes\win-x64\native\pocket_tts.dll" PackagePath="runtimes\win-x64\native\" Pack="true">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
