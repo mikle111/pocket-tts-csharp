@@ -1,6 +1,6 @@
-# C# bindings for Pocket TTS Rust lib
+# Pocket TTS (C#)
 
-Bindings for [Pocket TTS (Rust/Candle)](https://github.com/babybirdprd/pocket-tts) - a native Rust port of [Kyutai's Pocket TTS](https://github.com/kyutai-labs/pocket-tts).
+FFI and C# bindings for [Pocket TTS (Rust/Candle)](https://github.com/babybirdprd/pocket-tts) - a native Rust port of [Kyutai's Pocket TTS](https://github.com/kyutai-labs/pocket-tts).
 
 ## Features
 
