@@ -10,4 +10,11 @@
     <ProjectReference Include="..\PocketTTS\PocketTTS.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Include="..\..\assets\ref.wav">
+      <Link>ref.wav</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
 </Project>

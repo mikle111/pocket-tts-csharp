@@ -14,12 +14,12 @@ public sealed class ModelHandle : SafeHandleZeroOrMinusOneIsInvalid
 
     public static ModelHandle LoadFromFiles(string configPath, string weightsPath, string tokenizerPath)
     {
-        if (string.IsNullOrEmpty(configPath))
-            throw new ArgumentNullException(nameof(configPath));
-        if (string.IsNullOrEmpty(weightsPath))
-            throw new ArgumentNullException(nameof(weightsPath));
-        if (string.IsNullOrEmpty(tokenizerPath))
-            throw new ArgumentNullException(nameof(tokenizerPath));
+        if (!File.Exists(configPath))
+            throw new ArgumentException("Config file not found", nameof(configPath));
+        if (!File.Exists(weightsPath))
+            throw new ArgumentException("Weights file not found", nameof(weightsPath));
+        if (!File.Exists(tokenizerPath))
+            throw new ArgumentException("Tokenizer file not found", nameof(tokenizerPath));
 
         var model = NativeApi.pocket_tts_load_from_files(configPath, weightsPath, tokenizerPath);
         return model;

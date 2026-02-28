@@ -9,8 +9,8 @@
     <Company>Pocket TTS</Company>
     <Description>Wrapped Pocket TTS</Description>
     <PackageLicenseExpression>MIT OR Apache-2.0</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/babybirdprd/pocket-tts</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/babybirdprd/pocket-tts</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/mikle111/pocket-tts-csharp</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/mikle111/pocket-tts-csharp</RepositoryUrl>
     <PackageTags>tts;speech-synthesis;text-to-speech;audio;rust;candle</PackageTags>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
