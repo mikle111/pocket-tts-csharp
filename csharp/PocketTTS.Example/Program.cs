@@ -15,23 +15,24 @@ namespace PocketTTS.Example
                 const string configPath = "b6369a24.yaml";
                 const string weightsPath = "tts_b6369a24.safetensors";
                 const string tokenizerPath = "tokenizer.model";
-                
+
                 //Load model
                 using var model = ModelHandle.LoadFromFiles(configPath, weightsPath, tokenizerPath);
                 Console.WriteLine($"Loaded model. Sample reate {model.SampleRate}");
-                
+
                 //Create PocketTtsInferenceService
-                var inferenceService = new PocketTtsInferenceService(model, 8);
-                
+                const int maxParallelWorkers = 4;
+                var inferenceService = new PocketTtsInferenceService(model, maxParallelWorkers);
+
                 //Add voice and assign some name do it
                 const string voiceName = "reference voice";
                 inferenceService.AddVoice(voiceName, "ref.wav");
-                
+
                 //Run the Service
                 var serviceCts = new CancellationTokenSource();
                 var serviceRunTask = inferenceService.Run(serviceCts.Token);
-                
-                var text = "Hello there, PacketTTS!";
+
+                var text = "Hello there, PocketTTS!";
 
                 //simple inference
                 var audio = await inferenceService.Generate(text, voiceName, CancellationToken.None);
@@ -44,7 +45,7 @@ namespace PocketTTS.Example
                     audioChunks.AddRange(chunk);
                 }
                 Helpers.WriteWav(audioChunks, model.SampleRate, $"out_streaming.wav");
-                
+
                 //Stop the Service
                 await serviceCts.CancelAsync();
                 await serviceRunTask;

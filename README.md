@@ -8,10 +8,52 @@ Bindings for [Pocket TTS (Rust/Candle)](https://github.com/babybirdprd/pocket-tt
 - **Streaming** - Full-pipeline stateful streaming for zero-latency audio
 - **Parallel inference** - Meet InferenceService - easy to use high-level API with multithreading support
 - **Control** - Use ModelHandle API for tinkering
-- **Multiplatform** - Supports Windows, Linux out of the box (MacOS also, if you build for it manually)
+- **Multiplatform** - Supports Windows and Linux out of the box (MacOS also, if you build for it manually)
 - **Single nuget** - Native libraries included into the nuget
 
-## Quick Start
+### Example
+
+See csharp/PocketTTS.Example
+
+```csharp
+//Load model
+using var model = ModelHandle.LoadFromFiles(configPath, weightsPath, tokenizerPath);
+Console.WriteLine($"Loaded model. Sample reate {model.SampleRate}");
+
+//Create PocketTtsInferenceService
+const int maxParallelWorkers = 4;
+var inferenceService = new PocketTtsInferenceService(model, maxParallelWorkers);
+
+//Add voice and assign some name do it
+const string voiceName = "reference voice";
+inferenceService.AddVoice(voiceName, "ref.wav");
+
+//Run the Service
+var serviceCts = new CancellationTokenSource();
+var serviceRunTask = inferenceService.Run(serviceCts.Token);
+
+var text = "Hello there, PocketTTS!";
+
+//Simple inference
+var audio = await inferenceService.Generate(text, voiceName, CancellationToken.None);
+Helpers.WriteWav(audio, model.SampleRate, $"out.wav");
+
+//Streaming inference
+var audioChunks = new List<float>();
+await foreach (var chunk in inferenceService.GenerateStream(text, voiceName, CancellationToken.None))
+{
+    audioChunks.AddRange(chunk);
+}
+Helpers.WriteWav(audioChunks, model.SampleRate, $"out_streaming.wav");
+
+//Stop the Service
+await serviceCts.CancelAsync();
+await serviceRunTask;
+```
+
+## Building
+
+The nuget is saved to nuget/
 
 ### Build with Docker
 
@@ -54,45 +96,6 @@ scripts/build-csharp.ps1
 # Build C# wrapper
 scripts/pack-nuget.ps1
 ```
-
-### Examples
-
-```csharp
-//Load model
-using var model = ModelHandle.LoadFromFiles(configPath, weightsPath, tokenizerPath);
-Console.WriteLine($"Loaded model. Sample reate {model.SampleRate}");
-
-//Create PocketTtsInferenceService
-var inferenceService = new PocketTtsInferenceService(model, 8);
-
-//Add voice and assign some name do it
-const string voiceName = "reference voice";
-inferenceService.AddVoice(voiceName, "ref.wav");
-
-//Run the Service
-var serviceCts = new CancellationTokenSource();
-var serviceRunTask = inferenceService.Run(serviceCts.Token);
-
-var text = "Hello there, PacketTTS!";
-
-//simple inference
-var audio = await inferenceService.Generate(text, voiceName, CancellationToken.None);
-Helpers.WriteWav(audio, model.SampleRate, $"out.wav");
-
-//streaming inference
-var audioChunks = new List<float>();
-await foreach (var chunk in inferenceService.GenerateStream(text, voiceName, CancellationToken.None))
-{
-    audioChunks.AddRange(chunk);
-}
-Helpers.WriteWav(audioChunks, model.SampleRate, $"out_streaming.wav");
-
-//Stop the Service
-await serviceCts.CancelAsync();
-await serviceRunTask;
-```
-
-Check csharp/PocketTTS.Example
 
 ## License
 
