@@ -16,7 +16,15 @@ internal class StreamingJob : JobBase
     public override void Execute(ModelHandle model, ConcurrentDictionary<string, ModelStateHandle> voices)
     {
         using var voice = voices[VoiceName].Clone();
-        model.GenerateStream(Text, voice, OnChunk, OnFinished, OnError);
+        try
+        {
+            model.GenerateStream(Text, voice, OnChunk, OnFinished, OnError);
+        }
+        catch(Exception e)
+        {
+            _chunksChannel.Complete(e);
+        }
+
         return;
 
         bool OnChunk(float[] chunk)

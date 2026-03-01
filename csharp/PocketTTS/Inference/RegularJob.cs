@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
 
@@ -17,7 +18,14 @@ internal class RegularJob : JobBase
     public override void Execute(ModelHandle model, ConcurrentDictionary<string, ModelStateHandle> voices)
     {
         using var voice = voices[VoiceName].Clone();
-        var result = model.Generate(Text, voice);
-        _taskCompletionSource.SetResult(result);
+        try
+        {
+            var result = model.Generate(Text, voice);
+            _taskCompletionSource.SetResult(result);
+        }
+        catch (Exception e)
+        {
+            _taskCompletionSource.SetException(e);
+        }
     }
 }
