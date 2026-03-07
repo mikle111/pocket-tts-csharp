@@ -6,6 +6,7 @@ namespace PocketTTS.Abstractions;
 
 public interface IPocketTtsInferenceService
 {
+    int SampleRate { get; }
     Task Run(CancellationToken stoppingToken);
     void AddVoice(string voiceName, string voicePath);
     Task<float[]> Generate(string text, string voiceName, CancellationToken ct);
