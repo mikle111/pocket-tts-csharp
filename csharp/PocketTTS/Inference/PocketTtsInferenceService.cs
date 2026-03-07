@@ -26,6 +26,8 @@ public sealed class PocketTtsInferenceService : IPocketTtsInferenceService
         _maxParallelWorkers = maxParallelWorkers;
         _voices = new ConcurrentDictionary<string, ModelStateHandle>();
     }
+    
+    public int SampleRate => (int)_model.SampleRate;
 
     public void AddVoice(string voiceName, string voicePath)
     {

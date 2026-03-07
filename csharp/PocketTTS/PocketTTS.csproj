@@ -4,7 +4,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <LangVersion>latest</LangVersion>
     <PackageId>PocketTTS</PackageId>
-    <Version>0.6.2</Version>
+    <Version>1.0.0</Version>
     <Authors>Pocket TTS Contributors</Authors>
     <Company>Pocket TTS</Company>
     <Description>Wrapped Pocket TTS</Description>
@@ -16,21 +16,26 @@
     <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
+  </PropertyGroup>
+  
   <ItemGroup>
-    <Content Include="..\..\README.md">
-      <Link>README.md</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    
-    <!-- Windows x64 native library -->
-    <Content Include="..\..\runtimes\win-x64\native\pocket_tts.dll" PackagePath="runtimes\win-x64\native\" Pack="true">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    <None Include="..\..\README.md" PackagePath="\" Pack="true" />
+  </ItemGroup>
 
-    <!-- Linux x64 native library -->
-    <Content Include="..\..\runtimes\linux-x64\native\libpocket_tts.so" PackagePath="runtimes\linux-x64\native\" Pack="true">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+  <ItemGroup>
+    <None Include="..\..\runtimes\win-x64\native\pocket_tts.dll" PackagePath="runtimes\win-x64\native\" Pack="true" />
+    <None Include="..\..\runtimes\win-x64\native\pocket_tts.dll"
+          Link="runtimes\win-x64\native\pocket_tts.dll"
+          CopyToOutputDirectory="PreserveNewest"
+          Pack="false" />
+    <None Include="..\..\runtimes\linux-x64\native\libpocket_tts.so" PackagePath="runtimes\linux-x64\native\" Pack="true" />
+    <None Include="..\..\runtimes\linux-x64\native\libpocket_tts.so"
+          Link="runtimes\linux-x64\native\libpocket_tts.so"
+          CopyToOutputDirectory="PreserveNewest"
+          Pack="false" />
   </ItemGroup>
 
 </Project>
