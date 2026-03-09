@@ -4,7 +4,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <LangVersion>latest</LangVersion>
     <PackageId>PocketTTS</PackageId>
-    <Version>1.0.0</Version>
+    <Version>1.0.1</Version>
     <Authors>Pocket TTS Contributors</Authors>
     <Company>Pocket TTS</Company>
     <Description>Wrapped Pocket TTS</Description>
