@@ -42,14 +42,14 @@ internal static class NativeApi
     
     [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     internal static extern ModelHandle pocket_tts_load_from_files(
-        [MarshalAs(UnmanagedType.LPStr)] string configPath,
-        [MarshalAs(UnmanagedType.LPStr)] string weightsPath,
-        [MarshalAs(UnmanagedType.LPStr)] string tokenizerPath);
+        [MarshalAs(UnmanagedType.LPUTF8Str)] string configPath,
+        [MarshalAs(UnmanagedType.LPUTF8Str)] string weightsPath,
+        [MarshalAs(UnmanagedType.LPUTF8Str)] string tokenizerPath);
 
     [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     internal static extern AudioBufferHanlde pocket_tts_generate(
         ModelHandle modelHandle,
-        [MarshalAs(UnmanagedType.LPStr)] string text,
+        [MarshalAs(UnmanagedType.LPUTF8Str)] string text,
         ModelStateHandle modelStateHandle);
 
     [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
@@ -64,12 +64,12 @@ internal static class NativeApi
     [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
     internal static extern ModelStateHandle pocket_tts_get_voice_state_from_wav(
         ModelHandle modelHandle,
-        [MarshalAs(UnmanagedType.LPStr)] string path);
+        [MarshalAs(UnmanagedType.LPUTF8Str)] string path);
 
     [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
     internal static extern ModelStateHandle pocket_tts_get_voice_state_from_safetensors(
         ModelHandle modelHandle,
-        [MarshalAs(UnmanagedType.LPStr)] string path);
+        [MarshalAs(UnmanagedType.LPUTF8Str)] string path);
 
     [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
     internal static extern ModelStateHandle pocket_tts_copy_voice_state(ModelStateHandle modelStateHandle);
@@ -79,13 +79,13 @@ internal static class NativeApi
 
     [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
     internal static extern void pocket_tts_create_safetensors_from_wav(ModelHandle modelHandle,
-        [MarshalAs(UnmanagedType.LPStr)] string wavPath,
-        [MarshalAs(UnmanagedType.LPStr)] string safetensorsPath);
+        [MarshalAs(UnmanagedType.LPUTF8Str)] string wavPath,
+        [MarshalAs(UnmanagedType.LPUTF8Str)] string safetensorsPath);
 
     [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     internal static extern void pocket_tts_generate_stream(
         ModelHandle modelHandle,
-        [MarshalAs(UnmanagedType.LPStr)] string text,
+        [MarshalAs(UnmanagedType.LPUTF8Str)] string text,
         ModelStateHandle modelStateHandle,
         StreamChunkCallback onChunk,
         StreamFinishedCallback onFinished,
