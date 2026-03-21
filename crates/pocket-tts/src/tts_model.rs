@@ -11,7 +11,9 @@ use crate::models::mimi::MimiModel;
 use crate::models::seanet::{SEANetDecoder, SEANetEncoder};
 use crate::models::transformer::{ProjectedTransformer, StreamingTransformer};
 use crate::modules::mlp::SimpleMLPAdaLN;
-use crate::voice_state::{increment_steps, init_states, ATTN_POS_KEY, ATTN_LEN_KEY, ATTN_K_BUF_KEY, ATTN_V_BUF_KEY};
+use crate::voice_state::{
+    ATTN_K_BUF_KEY, ATTN_LEN_KEY, ATTN_POS_KEY, ATTN_V_BUF_KEY, increment_steps, init_states,
+};
 use std::collections::HashMap;
 
 use anyhow::Result;
@@ -487,9 +489,9 @@ impl TTSModel {
         let audio = audio.unsqueeze(0)?;
 
         let voice_state = self.get_voice_state_from_tensor(&audio)?;
-        
+
         let mut flat_map: HashMap<String, Tensor> = HashMap::new();
-        
+
         for (outer_key, inner_map) in voice_state {
             let offset_scalar = inner_map[ATTN_POS_KEY]
                 .to_device(&Device::Cpu)?
@@ -498,14 +500,14 @@ impl TTSModel {
             let k_buf = inner_map[ATTN_K_BUF_KEY].to_device(&Device::Cpu)?;
             let v_buf = inner_map[ATTN_V_BUF_KEY].to_device(&Device::Cpu)?;
             let cache = pack_kv_cache(&k_buf, &v_buf, offset_scalar)?;
-            let new_outer_key = outer_key
-                .strip_prefix("flow_lm.")
-                .ok_or_else(|| anyhow::anyhow!("Expected prefix 'flow_lm.' not found in key: {}", outer_key))?;
-            
+            let new_outer_key = outer_key.strip_prefix("flow_lm.").ok_or_else(|| {
+                anyhow::anyhow!("Expected prefix 'flow_lm.' not found in key: {}", outer_key)
+            })?;
+
             flat_map.insert(format!("{}/{}", new_outer_key, "cache"), cache);
             flat_map.insert(format!("{}/{}", new_outer_key, "current_end"), offset);
         }
-        
+
         candle_core::safetensors::save(&flat_map, safetensors_path)?;
 
         Ok(())
@@ -530,7 +532,7 @@ impl TTSModel {
         let audio = audio.unsqueeze(0)?;
 
         let voice_state = self.get_voice_state_from_tensor(&audio)?;
-             
+
         let mut flat_map: HashMap<String, Tensor> = HashMap::new();
 
         for (outer_key, inner_map) in voice_state {
@@ -544,9 +546,9 @@ impl TTSModel {
             let k_buf = inner_map[ATTN_K_BUF_KEY].to_device(&Device::Cpu)?;
             let v_buf = inner_map[ATTN_V_BUF_KEY].to_device(&Device::Cpu)?;
             let cache = pack_kv_cache(&k_buf, &v_buf, offset_scalar)?;
-            let new_outer_key = outer_key
-                .strip_prefix("flow_lm.")
-                .ok_or_else(|| anyhow::anyhow!("Expected prefix 'flow_lm.' not found in key: {}", outer_key))?;
+            let new_outer_key = outer_key.strip_prefix("flow_lm.").ok_or_else(|| {
+                anyhow::anyhow!("Expected prefix 'flow_lm.' not found in key: {}", outer_key)
+            })?;
 
             flat_map.insert(format!("{}/{}", new_outer_key, "cache"), cache);
             flat_map.insert(format!("{}/{}", new_outer_key, "offset"), offset);
@@ -598,37 +600,37 @@ impl TTSModel {
         path: P,
     ) -> Result<ModelState> {
         let tensors = candle_core::safetensors::load(path, &self.device)?;
-        
+
         let n = tensors.len();
-        
+
         if n % 2 != 0 {
             return Err(anyhow::anyhow!(
                 "Expected an even number of tensors in the map, but found {}.",
                 n
             ));
         }
-    
+
         let mut flow_state = init_states(1, 1000);
-    
+
         let num_layers = n / 2;
-    
+
         for x in 0..num_layers {
             let cache_name = format!("transformer.layers.{}.self_attn/cache", x);
             let offset_name = format!("transformer.layers.{}.self_attn/current_end", x);
-    
+
             let cache = tensors
                 .get(&cache_name)
                 .ok_or_else(|| anyhow::anyhow!("Missing expected tensor: {}", cache_name))?;
-                
+
             let offset = tensors
                 .get(&offset_name)
                 .ok_or_else(|| anyhow::anyhow!("Missing expected tensor: {}", offset_name))?;
-    
+
             let (k_buf, v_buf) = unpack_kv_cache(&cache)?;
             let offset_len = offset.dim(0)?;
             let attn_pos = Tensor::new(offset_len as u32, &self.device)?;
             let attn_len = Tensor::new(offset_len as i64, &self.device)?;
-            
+
             let mut layer_weights = HashMap::new();
             layer_weights.insert(ATTN_K_BUF_KEY.to_string(), k_buf);
             layer_weights.insert(ATTN_V_BUF_KEY.to_string(), v_buf);
@@ -638,7 +640,7 @@ impl TTSModel {
             let layer_name = format!("flow_lm.transformer.layers.{}.self_attn", x);
             flow_state.insert(layer_name, layer_weights);
         }
-    
+
         Ok(flow_state)
     }
 
@@ -649,37 +651,40 @@ impl TTSModel {
         path: P,
     ) -> Result<ModelState> {
         let tensors = candle_core::safetensors::load(path, &self.device)?;
-        
+
         let n = tensors.len();
-        
+
         if n % 2 != 0 {
             return Err(anyhow::anyhow!(
                 "Expected an even number of tensors in the map, but found {}.",
                 n
             ));
         }
-    
+
         let mut flow_state = init_states(1, 1000);
-    
+
         let num_layers = n / 2;
-    
+
         for x in 0..num_layers {
             let cache_name = format!("transformer.layers.{}.self_attn/cache", x);
             let offset_name = format!("transformer.layers.{}.self_attn/offset", x);
-    
+
             let cache = tensors
                 .get(&cache_name)
                 .ok_or_else(|| anyhow::anyhow!("Missing expected tensor: {}", cache_name))?;
-                
+
             let offset = tensors
                 .get(&offset_name)
                 .ok_or_else(|| anyhow::anyhow!("Missing expected tensor: {}", offset_name))?
                 .squeeze(0)?;
-    
+
             let (k_buf, v_buf) = unpack_kv_cache(&cache)?;
-            let attn_pos = Tensor::new(offset.to_dtype(DType::U32)?.to_scalar::<u32>()?, &self.device)?;
+            let attn_pos = Tensor::new(
+                offset.to_dtype(DType::U32)?.to_scalar::<u32>()?,
+                &self.device,
+            )?;
             let attn_len = Tensor::new(offset.to_scalar::<i64>()?, &self.device)?;
-            
+
             let mut layer_weights = HashMap::new();
             layer_weights.insert(ATTN_K_BUF_KEY.to_string(), k_buf);
             layer_weights.insert(ATTN_V_BUF_KEY.to_string(), v_buf);
@@ -689,7 +694,7 @@ impl TTSModel {
             let layer_name = format!("flow_lm.transformer.layers.{}.self_attn", x);
             flow_state.insert(layer_name, layer_weights);
         }
-    
+
         Ok(flow_state)
     }
 
@@ -1366,17 +1371,17 @@ fn pack_kv_cache(keys: &Tensor, values: &Tensor, offset: usize) -> Result<Tensor
     // stacked shape: [2, 1, 16, 128, 64]
     let stacked = Tensor::stack(&[keys, values], 0)?;
 
-    // Step 2: Swap the 'heads' dimension (index 2, size 16) 
+    // Step 2: Swap the 'heads' dimension (index 2, size 16)
     // with the 'seq_len' dimension (index 3, size 128).
     // since that is what python emplementation uses
     // transposed shape: [2, 1, 128, 16, 64]
     let packed = stacked.transpose(2, 3)?;
-    
+
     // Step 3: Respect the offset
     // example offset: 50
     // packed_with_offset shape: [2, 1, 50, 16, 64]
     let packed_with_offset = packed.narrow(2, 0, offset)?;
-    
+
     // Step 4: Make the tensor contiguous in memory.
     let packed_contiguous = packed_with_offset.contiguous()?;
 
@@ -1392,7 +1397,7 @@ fn unpack_kv_cache(packed: &Tensor) -> Result<(Tensor, Tensor)> {
     // Step 2: Extract keys and values.
     // keys shape: [1, 16, 128, 64]
     let keys = transposed.get(0)?;
-    
+
     // values shape: [1, 16, 128, 64]
     let values = transposed.get(1)?;
 
