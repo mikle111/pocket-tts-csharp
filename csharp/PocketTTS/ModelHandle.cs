@@ -46,6 +46,26 @@ public sealed class ModelHandle : SafeHandleZeroOrMinusOneIsInvalid
         return voice;
     }
         
+    public ModelStateHandle GetModelStateFromSafetensorsV2(string path)
+    {
+        if(!File.Exists(path))
+        {
+            throw new FileNotFoundException("Voice file not found", path);
+        }
+        var voice = NativeApi.pocket_tts_get_voice_state_from_safetensors_v2(this, path);
+        return voice;
+    }
+        
+    public ModelStateHandle GetModelStateFromSafetensorsV3(string path)
+    {
+        if(!File.Exists(path))
+        {
+            throw new FileNotFoundException("Voice file not found", path);
+        }
+        var voice = NativeApi.pocket_tts_get_voice_state_from_safetensors_v3(this, path);
+        return voice;
+    }
+        
     public float[] Generate(string text, ModelStateHandle modelState)
     {
         if (string.IsNullOrEmpty(text))
@@ -110,6 +130,24 @@ public sealed class ModelHandle : SafeHandleZeroOrMinusOneIsInvalid
             throw new FileNotFoundException("Wave file not found", wavPath);
         }
         NativeApi.pocket_tts_create_safetensors_from_wav(this, wavPath, safetensorsPath);
+    }
+
+    public void CreateSafetensorsFromWavV2(string wavPath, string safetensorsPath)
+    {
+        if (!File.Exists(wavPath))
+        {
+            throw new FileNotFoundException("Wave file not found", wavPath);
+        }
+        NativeApi.pocket_tts_create_safetensors_from_wav_v2(this, wavPath, safetensorsPath);
+    }
+
+    public void CreateSafetensorsFromWavV3(string wavPath, string safetensorsPath)
+    {
+        if (!File.Exists(wavPath))
+        {
+            throw new FileNotFoundException("Wave file not found", wavPath);
+        }
+        NativeApi.pocket_tts_create_safetensors_from_wav_v3(this, wavPath, safetensorsPath);
     }
 
     protected override bool ReleaseHandle()

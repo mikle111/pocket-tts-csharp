@@ -299,6 +299,62 @@ pub unsafe extern "C" fn pocket_tts_get_voice_state_from_safetensors(
     }
 }
 
+/// Create a voice state from an safetensors v2 file path
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pocket_tts_get_voice_state_from_safetensors_v2(
+    model: *mut TTSModel,
+    path: *const c_char,
+) -> *mut ModelState {
+    if model.is_null() || path.is_null() {
+        return ptr::null_mut();
+    }
+
+    let model = unsafe { &*model };
+    let path_str = match unsafe { CStr::from_ptr(path) }.to_str() {
+        Ok(s) => s,
+        Err(err) => {
+            eprintln!("Bad path: {:?}", err);
+            return ptr::null_mut();
+        }
+    };
+
+    match model.get_voice_state_from_prompt_file_v2(path_str) {
+        Ok(state) => Box::into_raw(Box::new(state)),
+        Err(err) => {
+            eprintln!("Failed to get voice from safetensors: {:?}", err);
+            return ptr::null_mut();
+        }
+    }
+}
+
+/// Create a voice state from an safetensors v3 file path
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pocket_tts_get_voice_state_from_safetensors_v3(
+    model: *mut TTSModel,
+    path: *const c_char,
+) -> *mut ModelState {
+    if model.is_null() || path.is_null() {
+        return ptr::null_mut();
+    }
+
+    let model = unsafe { &*model };
+    let path_str = match unsafe { CStr::from_ptr(path) }.to_str() {
+        Ok(s) => s,
+        Err(err) => {
+            eprintln!("Bad path: {:?}", err);
+            return ptr::null_mut();
+        }
+    };
+
+    match model.get_voice_state_from_prompt_file_v3(path_str) {
+        Ok(state) => Box::into_raw(Box::new(state)),
+        Err(err) => {
+            eprintln!("Failed to get voice from safetensors: {:?}", err);
+            return ptr::null_mut();
+        }
+    }
+}
+
 /// Create a voice saftensors from wav
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn pocket_tts_create_safetensors_from_wav(
@@ -328,6 +384,74 @@ pub unsafe extern "C" fn pocket_tts_create_safetensors_from_wav(
     };
 
     match model.save_audio_as_voice_prompt(wav_path_str, safetensors_path_str) {
+        Ok(_) => {}
+        Err(err) => eprintln!("Failed to save safetensors: {:?}", err),
+    }
+}
+
+/// Create a voice saftensors from wav
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pocket_tts_create_safetensors_from_wav_v2(
+    model: *mut TTSModel,
+    wav_path: *const c_char,
+    safetensors_path: *const c_char,
+) {
+    if model.is_null() || wav_path.is_null() || safetensors_path.is_null() {
+        eprintln!("Null in parameters");
+        return;
+    }
+
+    let model = unsafe { &*model };
+    let wav_path_str = match unsafe { CStr::from_ptr(wav_path) }.to_str() {
+        Ok(s) => s,
+        Err(err) => {
+            eprintln!("Bad wav_path: {:?}", err);
+            return;
+        }
+    };
+    let safetensors_path_str = match unsafe { CStr::from_ptr(safetensors_path) }.to_str() {
+        Ok(s) => s,
+        Err(err) => {
+            eprintln!("Bad safetensors_path: {:?}", err);
+            return;
+        }
+    };
+
+    match model.save_audio_as_voice_prompt_v2(wav_path_str, safetensors_path_str) {
+        Ok(_) => {}
+        Err(err) => eprintln!("Failed to save safetensors: {:?}", err),
+    }
+}
+
+/// Create a voice saftensors from wav
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pocket_tts_create_safetensors_from_wav_v3(
+    model: *mut TTSModel,
+    wav_path: *const c_char,
+    safetensors_path: *const c_char,
+) {
+    if model.is_null() || wav_path.is_null() || safetensors_path.is_null() {
+        eprintln!("Null in parameters");
+        return;
+    }
+
+    let model = unsafe { &*model };
+    let wav_path_str = match unsafe { CStr::from_ptr(wav_path) }.to_str() {
+        Ok(s) => s,
+        Err(err) => {
+            eprintln!("Bad wav_path: {:?}", err);
+            return;
+        }
+    };
+    let safetensors_path_str = match unsafe { CStr::from_ptr(safetensors_path) }.to_str() {
+        Ok(s) => s,
+        Err(err) => {
+            eprintln!("Bad safetensors_path: {:?}", err);
+            return;
+        }
+    };
+
+    match model.save_audio_as_voice_prompt_v3(wav_path_str, safetensors_path_str) {
         Ok(_) => {}
         Err(err) => eprintln!("Failed to save safetensors: {:?}", err),
     }

@@ -54,6 +54,11 @@ public sealed class PocketTtsInferenceService : IPocketTtsInferenceService
         _voices.TryAdd(voiceName, voice);
     }
 
+    public void AddVoice(string voiceName, ModelStateHandle voice)
+    {
+        _voices.TryAdd(voiceName, voice);
+    }
+
     public async Task Run(CancellationToken stoppingToken)
     {
         if (_isRunning)
