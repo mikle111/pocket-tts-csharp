@@ -626,7 +626,7 @@ impl TTSModel {
                 .get(&offset_name)
                 .ok_or_else(|| anyhow::anyhow!("Missing expected tensor: {}", offset_name))?;
 
-            let (k_buf, v_buf) = unpack_kv_cache(&cache)?;
+            let (k_buf, v_buf) = unpack_kv_cache(cache)?;
             let offset_len = offset.dim(0)?;
             let attn_pos = Tensor::new(offset_len as u32, &self.device)?;
             let attn_len = Tensor::new(offset_len as i64, &self.device)?;
@@ -678,7 +678,7 @@ impl TTSModel {
                 .ok_or_else(|| anyhow::anyhow!("Missing expected tensor: {}", offset_name))?
                 .squeeze(0)?;
 
-            let (k_buf, v_buf) = unpack_kv_cache(&cache)?;
+            let (k_buf, v_buf) = unpack_kv_cache(cache)?;
             let attn_pos = Tensor::new(
                 offset.to_dtype(DType::U32)?.to_scalar::<u32>()?,
                 &self.device,
